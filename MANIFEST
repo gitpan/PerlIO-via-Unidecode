@@ -1,0 +1,10 @@
+ChangeLog
+lib/PerlIO/via/Unidecode.pm
+Makefile.old
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+README
+t/00via.t
+t/10fet.t
+META.yml                                Module meta-data (added by MakeMaker)
