@@ -1,13 +1,25 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         PerlIO-via-Unidecode
-version:      1.01
-version_from: lib/PerlIO/via/Unidecode.pm
-installdirs:  site
+---
+abstract: 'a perlio layer for Unidecode'
+author:
+  - 'Sean Burke <sburke@cpan.org>'
+build_requires:
+  ExtUtils::MakeMaker: 0
+configure_requires:
+  ExtUtils::MakeMaker: 0
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: PerlIO-via-Unidecode
+no_index:
+  directory:
+    - t
+    - inc
 requires:
-    strict:                        0
-    Text::Unidecode:               0
-    utf8:                          0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.16
+  Text::Unidecode: 0
+  perl: 5.008
+  strict: 0
+  utf8: 0
+version: 1.02

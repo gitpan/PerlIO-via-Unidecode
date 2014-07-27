@@ -1,7 +1,8 @@
 
 require 5.008;
 package PerlIO::via::Unidecode;
-$VERSION = "1.01";
+#  Last-Modified Time-stamp: "2014-07-27 02:49:16 MDT sburke@cpan.org"
+$VERSION = "1.02";
 use strict;
 use utf8 ('decode');
 use Text::Unidecode ('unidecode');
@@ -29,27 +30,37 @@ sub WRITE {
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
 PerlIO::via::Unidecode - a perlio layer for Unidecode
 
 =head1 SYNOPSIS
 
+  # An example program using the perlio layer:
+
   % cat utf8translit
   #!/usr/bin/perl
   use strict;
   use PerlIO::via::Unidecode;
-  foreach my $f (@ARGV) {
-    open IN, '<:encoding(utf8):via(Unidecode)', $f or die "$f -> $!\n";
-    print while <IN>;
-    close(IN);
+  foreach my $fs (@ARGV) {
+    open( my $IN,
+      '<:encoding(utf8):via(Unidecode)', # the layers
+      $fs
+     ) or die "$f -> $!\n";
+    print while <$IN>;
+    close($IN);
   }
   __END__
+
+  # We're feeding it this file, which is the Chinese
+  # characters for Beijing (in UTF8)
 
   % od -x home_city.txt
   000000:  E5 8C 97 E4 BA B0 0D 0A
 
-I<that's the the Chinese characters for Beijing, in UTF8>
+  So:
 
   % utf8translit home_city.txt
   Bei Jing
@@ -68,19 +79,23 @@ feeds it to Unidecode, which then outputs an ASCII transliteration:
   #!/usr/bin/perl
   use strict;
   use PerlIO::via::Unidecode;
-  foreach my $f (@ARGV) {
-    open IN, '<:encoding(koi8-r):via(Unidecode)', $f or die $!;
-    print while <IN>;
-    close(IN);
+  foreach my $filespec (@ARGV) {
+    open(          # Three-argument open is always great
+      my $IN,
+      '<:encoding(koi8-r):via(Unidecode)',  # the layers
+      $filespec ) or die $!;
+
+    print while <$IN>;
+    close($IN);
   }
   __END__
 
   % cat fet_koi8r.txt
   
-  ����� ������ �� ����������� ������,
-  ��� ������ ������� ��� ������ ���� ������
-  � ������� ������� ���������� ������,-
-        �� ��������� �� � ���?
+  ëÏÇÄÁ ÞÉÔÁÌÁ ÔÙ ÍÕÞÉÔÅÌØÎÙÅ ÓÔÒÏËÉ,
+  çÄÅ ÓÅÒÄÃÁ Ú×ÕÞÎÙÊ ÐÙÌ ÓÉÑÎØÅ ÌØÅÔ ËÒÕÇÏÍ
+  é ÓÔÒÁÓÔÉ ÒÏËÏ×ÏÊ ×ÚÄÙÍÁÀÔÓÑ ÐÏÔÏËÉ,-
+        îÅ ×ÓÐÏÍÎÉÌÁ ÌØ Ï ÞÅÍ?
 
   % transkoi8r fet_koi8r.txt
 
@@ -100,19 +115,23 @@ see.
 
   % cat writebei.pl
   use PerlIO::via::Unidecode;
-  open OUT, ">:via(Unidecode):utf8", "rombei.txt" or die $!;
-  print OUT "\x{5317}\x{4EB0}\n";
+  open(
+    my $OUT,
+    ">:via(Unidecode):utf8",  # the layers
+    "roman_bei.txt"
+   ) or die $!;
+  print $OUT "\x{5317}\x{4EB0}\n";
     # those are the Chinese characters for Beijing
-  close(OUT);
+  close($OUT);
 
   % perl writebei.pl
   
-  % cat rombei.txt
+  % cat roman_bei.txt
   Bei Jing 
 
 =head1 FUNCTIONS AND METHODS
 
-This module provides no public functions or methods --
+This module provides no public functions or methods —
 everything is done thru the C<via> interface.  If you want a function,
 see L<Text::Unidecode>.
 
@@ -123,7 +142,7 @@ get the case right.
 
 Don't type "Unicode" when you mean "Unidecode", nor vice versa.
 
-Handy modes to remember:
+Handy layer-modes to remember:
 
   <:encoding(utf8):via(Unidecode)
   <:encoding(some-other-encoding):via(Unidecode)
@@ -140,16 +159,60 @@ implement are called as "C<:encodI<ing>(...)>").
 
 L<PerlIO::via::PinyinConvert>
 
+L<perlunitut> and L<perlunicode>
+
+L<https://en.wikipedia.org/wiki/Afanasy_Fet>
+
 =head1 NOTES
+
+Note that if Unidecode's transliteration of something changes, so will
+its effect on C<:via(Unidecode)>.  So the first word of the
+above text is "Koghda" from one particular version of Unidecode, and
+"Kogda" from another.
 
 Thanks for Jarkko Hietaniemi for help with this module and many
 other things besides.
 
+=head1 THE POEM
+
+In the first release of this module, I forgot to give the source
+of the above Russian text!  So here it is:
+
+The Russian text is the first stanza of a poem by Afanasy Afanasevich
+Fet (1822-1892).
+Above I have shown only its first stanza ("Koghda chitala..."), first
+in raw KOI8R, then passed through Unidecode.  But here it is, in its
+entirety:
+
+  Когда читала ты мучительные строки,
+  Где сердца звучный пыл сиянье льёт кругом
+  И страсти роковой вздымаются потоки,—
+    Не вспомнила ль о чём?
+
+  Я верить не хочу! Когда в степи, как диво,
+  В полночной темноте безвременно горя,
+  Вдали перед тобой прозрачно и красиво
+    Вставала вдруг заря.
+
+  И в эту красоту невольно взор тянуло,
+  В тот величавый блеск за тёмный весь предел,—
+  Ужель ничто тебе в то время не шепнуло:
+    «Там человек сгорел!»
+
+
+     —Афанасий Афанасьевич Фет, 15 февраля 1887
+
+
+Its conventional English title is a translation of the first line,
+"When you were reading those tormented lines"— which I found
+rather apt for a poem about mangled encodings.
+
 =head1 COPYRIGHT AND DISCLAIMER
 
-Copyright 2003, Sean M. Burke sburke@cpan.org, all rights reserved. This
-program is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
+With the exception of the text of the poem, this is copyright 2003,
+2014, Sean M. Burke sburke@cpan.org, all rights reserved. This program
+is free software; you can redistribute it and/or modify it under the
+same terms as Perl itself.
 
 The programs and documentation in this dist are distributed in the hope
 that they will be useful, but without any warranty; without even the
@@ -160,28 +223,4 @@ implied warranty of merchantability or fitness for a particular purpose.
 Sean M. Burke  sburkeE<64>cpan.org
 
 =cut
-
-
-# Gratuitous poetry:
-#
-# Leave of Grass: "Song of Myself"   -- Walt Whitman
-#
-# 
-# You shall no longer take things at second or third hand, nor look
-# through the eyes of the dead, nor feed on the spectres in books.
-# 
-# You shall not look through my eyes either, not take things from me.
-# 
-# You shall listen to all sides and filter them from yourself.
-# 
-# I mind them or the show or resonance of them - I come and I depart.
-# 
-# These are really the thoughts of all men in all ages and lands, they are
-# not original with me,
-# 
-# If they are not yours as much mine they are nothing, or next to nothing.
-# 
-# If they not the riddle and the untiying of the riddle they are nothing.
-# 
-# If they are not just as close as they are distant they are nothing.
 

@@ -46,11 +46,8 @@ DESCRIPTION
 
 SEE ALSO
     Text::Unidecode
-
     PerlIO::via
-
     Encode and Encode::Supported
-
     PerlIO::via::PinyinConvert
 
 NOTES
@@ -58,9 +55,9 @@ NOTES
     things besides.
 
 COPYRIGHT AND DISCLAIMER
-    Copyright 2003, Sean M. Burke sburke@cpan.org, all rights reserved. This
-    program is free software; you can redistribute it and/or modify it under
-    the same terms as Perl itself.
+    Copyright 2003, 2014, Sean M. Burke sburke@cpan.org, all rights reserved.
+    This program is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
 
     The programs and documentation in this dist are distributed in the hope
     that they will be useful, but without any warranty; without even the
@@ -69,32 +66,17 @@ COPYRIGHT AND DISCLAIMER
 AUTHOR
     Sean M. Burke sburke@cpan.org
 
-
-
-
 INSTALLATION
 
-You install PerlIO::via::Unidecode, as you would install any perl module
-library, by running these commands:
-
-   perl Makefile.PL
-   make
-   make test
-   make install
-
-If you want to install a private copy of PerlIO::via::Unidecode in
-your home directory, then you should try to produce the initial
-Makefile with something like this command:
-
-  perl Makefile.PL LIB=~/perl
-
-See perldoc perlmodinstall for more information on installing modules.
+* For using the "CPAN Plus" system, read:   perldoc cpanp
+* For old-style "make" interface, read:     perldoc perlmodinstall
 
 
 DOCUMENTATION
 
-POD-format documentation is included in Unidecode.pm.  POD is readable
-with the 'perldoc' utility.  See ChangeLog for recent changes.
+POD-format documentation is included in PerlIO/via/Unidecode.pm.
+POD is readable with the 'perldoc' utility.
+See ChangeLog for recent changes.
 
 
 SUPPORT

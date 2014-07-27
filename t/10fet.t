@@ -1,94 +1,75 @@
+# -*- coding:utf-8; mode:CPerl -*-
+#======================================================================
 
-use Test;
-BEGIN {plan tests => 3};
+use strict; use Test; BEGIN {plan tests => 6};
+print "#\n# I am ", __FILE__, "\n#  ",
+  q[ with Time-stamp: "2014-07-27 02:24:45 MDT sburke@cpan.org"],
+  "\n#\n",
+;
 
 ok 1;
 require PerlIO::via::Unidecode;
 
 use strict;
 
-my $fet = "Когда читала ты\nмучительные строки\n";
+my $fet_raw_koi8 = join '',  map( chr(hex($_)),
+    q[
+      eb cf c7 c4 c1   20   de c9 d4 c1 cc c1   20   d4 d9
+      0a
+      cd d5 de c9 d4 c5 cc d8 ce d9 c5   20   d3 d4 d2 cf cb c9
+    ]
+  =~ m<(\S+)>g )
+;
 
-my $f = 'koi8r.txt';
-open FET, ">", $f    or    die "Can't write-open $f: $!";
-print FET $fet;
-close(FET);
+# That's the KOI-8 encoding of the first line of the poem "When you were
+# reading those tormented lines" by Afanasy Afanasevich Fet.
 
-open IN, '<:encoding(koi8-r):via(Unidecode)', $f or die $!;
-my $x = join '', <IN>;
-close(IN);
-$x =~ s/^\s+//s;
-$x =~ s/\s+$//s;
-$x =~ s/\s+/ /g;
-ok $x, "Koghda chitala ty muchitiel'nyie stroki";
 
-#  open IN, '<:encoding(koi8-r):via(Unidecode)', $f or die $!;
-#  open OUT, ">:via(Unidecode):utf8", "rombei.txt" or die $!;
-#  <:encoding(utf8):via(Unidecode)
-#  <:encoding(some-other-encoding):via(Unidecode)
-#  >:via(Unidecode):utf8
+my $fet_fs = 'koi8r.txt';
+{
+  print "# Creating time file $fet_fs\n";
+  open my $FET, ">", $fet_fs    or    die "Can't write-open $fet_fs: $!";
+  binmode($FET) or die "Can't binmode $fet_fs - $!";
 
-unlink $f;
+  print "# Writing ", length($fet_raw_koi8), " bytes of KOI8 to it.\n";
+  print $FET $fet_raw_koi8;
+  ok 1;
+
+  close($FET) or die "Can't close write-file $fet_fs - $!";
+  ok 1;
+}
+
+my $unidecoded;
+{
+  my $Layer = '<:encoding(koi8-r):via(Unidecode)';
+  print "#Opening $fet_fs with layer: $Layer\n";
+  open(
+       my $IN,
+       $Layer,
+       $fet_fs
+    )  or die $!;
+  $unidecoded = join '', readline($IN);
+  die "Can't read from $fet_fs" unless $unidecoded;
+  close($IN);
+  $unidecoded =~ s/^\s+//s;
+  $unidecoded =~ s/\s+$//s;
+  $unidecoded =~ s/\s+/ /g;
+}
+
+ok $unidecoded, qr/\S+/; # basic sanity: that it has content
+
+# It should be something like: "Koghda chitala ty muchitiel'nyie stroki"
+{
+  my $u = $unidecoded;
+  $u =~ s/\n//g;
+  print "# Got: $u\n";
+}
+
+ok( $unidecoded, qr/^Kog .+ tala .+ strok .+ /msx );
+
+# If Unidecode's Cyrillic tables change, then the precise transliteration
+# could change.  But I'm just betting on at least those things being okay.
+
+unlink $fet_fs or die "Can't unlink temp-file $fet_fs - $!";
 
 ok 1;
-
-
-
-
-
-# Gratuitous poetry:
-#
-# "To his Coy Mistress"  by Andrew Marvell
-#  
-#  
-#  Had we but world enough, and time,
-#  This coyness, lady, were no crime.
-#  We would sit down and think which way
-#  To walk, and pass our long love's day;
-#  Thou by the Indian Ganges' side
-#  Shouldst rubies find; I by the tide
-#  Of Humber would complain. I would
-#  Love you ten years before the Flood;
-#  And you should, if you please, refuse
-#  Till the conversion of the Jews.
-#  My vegetable love should grow
-#  Vaster than empires, and more slow.
-#  An hundred years should go to praise
-#  Thine eyes, and on thy forehead gaze;
-#  Two hundred to adore each breast,
-#  But thirty thousand to the rest;
-#  An age at least to every part,
-#  And the last age should show your heart.
-#  For, lady, you deserve this state,
-#  Nor would I love at lower rate.
-#  
-#          But at my back I always hear
-#  Time's winged chariot hurrying near;
-#  And yonder all before us lie
-#  Deserts of vast eternity.
-#  Thy beauty shall no more be found,
-#  Nor, in thy marble vault, shall sound
-#  My echoing song; then worms shall try
-#  That long preserv'd virginity,
-#  And your quaint honour turn to dust,
-#  And into ashes all my lust.
-#  The grave's a fine and private place,
-#  But none I think do there embrace.
-#  
-#          Now therefore, while the youthful hue
-#  Sits on thy skin like morning dew,
-#  And while thy willing soul transpires
-#  At every pore with instant fires,
-#  Now let us sport us while we may;
-#  And now, like am'rous birds of prey,
-#  Rather at once our time devour,
-#  Than languish in his slow-chapp'd power.
-#  Let us roll all our strength, and all
-#  Our sweetness, up into one ball;
-#  And tear our pleasures with rough strife
-#  Thorough the iron gates of life.
-#  Thus, though we cannot make our sun
-#  Stand still, yet we will make him run.
-#
-# [end]
-
